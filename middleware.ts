@@ -11,20 +11,20 @@ export default auth((req) => {
   const isPublicRoute = ["/", "/ranks", "/auth/login", "/auth/signup", "/auth/new-verification"].includes(nextUrl.pathname)
   const isAuthRoute = nextUrl.pathname.startsWith("/auth")
 
-  if (isApiAuthRoute) return null
+  if (isApiAuthRoute) return
 
   if (isAuthRoute) {
     if (isLoggedIn) {
       return Response.redirect(new URL("/dashboard", nextUrl))
     }
-    return null
+    return
   }
 
   if (!isLoggedIn && !isPublicRoute) {
     return Response.redirect(new URL("/auth/login", nextUrl))
   }
 
-  return null
+  return
 })
 
 export const config = {
