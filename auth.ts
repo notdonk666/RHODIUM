@@ -11,33 +11,42 @@ export const {
   signIn, 
   signOut 
 } = NextAuth({
+  trustHost: true,
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { 
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     ...authConfig.providers,
     Credentials({
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        try {
+          if (!credentials?.email || !credentials?.password) return null
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          })
 
-        if (!user || !user.password) return null
-        if (!user.emailVerified) return null
+          if (!user || !user.password) {
+             console.error("[AUTH_DEBUG] No user or password found for email:", credentials.email);
+             return null
+          }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        )
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          )
 
-        if (!isPasswordValid) return null
-        return user
+          if (!isPasswordValid) {
+            console.error("[AUTH_DEBUG] Invalid password for email:", credentials.email);
+            return null
+          }
+          return user
+        } catch (error) {
+           console.error("[AUTH_FATAL_ERROR] Error in authorize:", error);
+           return null;
+        }
       },
     }),
   ],
