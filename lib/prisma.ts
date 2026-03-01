@@ -1,13 +1,28 @@
 import { PrismaClient } from "@prisma/client"
+import { Pool } from "pg"
+import { PrismaPg } from "@prisma/adapter-pg"
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  pgPool: Pool | undefined
 }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+if (!globalForPrisma.pgPool) {
+  globalForPrisma.pgPool = new Pool({ 
+    connectionString: process.env.DATABASE_URL,
+    max: 2, // Low pool size for serverless
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   })
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+if (!globalForPrisma.prisma) {
+  const adapter = new PrismaPg(globalForPrisma.pgPool)
+  globalForPrisma.prisma = new PrismaClient({ adapter })
+}
+
+export const prisma = globalForPrisma.prisma
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma
+}
