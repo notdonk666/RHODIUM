@@ -1,0 +1,7 @@
+[build]
+  command = "bun run build"
+  publish = ".next"
+
+[build.environment]
+  # Tell Netlify to ignore this public variable in the secrets scanner
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXTAUTH_URL"
