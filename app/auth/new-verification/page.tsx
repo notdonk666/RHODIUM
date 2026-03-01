@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { newVerification } from "@/lib/actions";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function NewVerificationPage() {
+function VerificationContent() {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -42,6 +42,32 @@ export default function NewVerificationPage() {
   }, [onSubmit]);
 
   return (
+    <div className="py-8">
+      {isVerifying && (
+        <div className="flex justify-center">
+          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 p-4 rounded-xl flex flex-col items-center gap-2">
+          <span className="text-2xl">✓</span>
+          <p>{success}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl flex flex-col items-center gap-2">
+          <span className="text-2xl">⚠</span>
+          <p>{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function NewVerificationPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -55,27 +81,13 @@ export default function NewVerificationPage() {
           <p className="text-zinc-400 text-sm">Email Verification</p>
         </div>
 
-        <div className="py-8">
-          {isVerifying && (
-            <div className="flex justify-center">
-              <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 p-4 rounded-xl flex flex-col items-center gap-2">
-              <span className="text-2xl">✓</span>
-              <p>{success}</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl flex flex-col items-center gap-2">
-              <span className="text-2xl">⚠</span>
-              <p>{error}</p>
-            </div>
-          )}
-        </div>
+        <Suspense fallback={
+          <div className="py-8 flex justify-center">
+            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
+          <VerificationContent />
+        </Suspense>
 
         <div className="pt-4">
           <Link 
