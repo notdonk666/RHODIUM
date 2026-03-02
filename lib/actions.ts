@@ -105,7 +105,7 @@ export async function signInWithGoogle() {
       throw error 
     }
     
-    if (error && typeof error === "object" && "digest" in error && (error as any).digest.startsWith("NEXT_REDIRECT")) {
+    if (error && typeof error === "object" && "digest" in error && (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
       throw error
     }
 
