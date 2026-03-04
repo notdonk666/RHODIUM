@@ -5,3 +5,6 @@
 [build.environment]
   # Tell Netlify to ignore these public variables in the secrets scanner
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXTAUTH_URL,AUTH_URL"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
